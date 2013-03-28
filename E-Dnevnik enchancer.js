@@ -12,6 +12,7 @@
 $(document).ready(function() {
     var averages = [];
     var badMarks = 0;
+	var toEscape = [];
     
 	// subject mark averages
     $(".grades > table:first-child").each(function(index) {
@@ -33,7 +34,10 @@ $(document).ready(function() {
                 content = content.slice(ind + 1, content.length);
             }
         }
-        if (count === 0 || parseFloat(sum/count).toFixed(2) === 0) return null; // no marks, leave it empty
+        if (count === 0 || parseFloat(sum/count).toFixed(2) === 0) {
+			toEscape.push(index);
+			return null; // no marks, leave it empty
+		}
         averages.push(parseFloat(sum / count).toFixed(2));
         $("tr:contains('ZAKLJUÈENO')", this).after('<tr><td class="activity bold">PROSJEK</td> <td colspan="10" class="t-center bold">' + averages[index] +  '</td></tr>');
     });
@@ -52,10 +56,15 @@ $(document).ready(function() {
     
 	// adds averages beside profesor's names
     var mark = sum / averages.length;
-    
+    var offset = 0;
     $(".course").each(function(index) {
-        $(".course-info", this).append(', <span id="prosjek" style="color:#baf">Prosjek: ' + averages[index] + '</span>');
-        if (averages[index] < 2.0) {
+		for (var j = 0; j < toEscape.length; j++)
+			if (index == toEscape[j]) {
+				offset++;
+				return null;
+			}
+        $(".course-info", this).append(', <span id="prosjek" style="color:#baf">Prosjek: ' + averages[index - offset] + '</span>');
+        if (averages[index - offset] < 2.0) {
             badMarks++;
             $("#prosjek", this).append(', <span style="color:red; font-weight: bold;">Trenutno padaš ovaj predmet!</span>');
         }
